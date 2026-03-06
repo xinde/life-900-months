@@ -1,0 +1,498 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>人生900个月</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      min-height: 100vh;
+      background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+      color: #fff;
+      padding: 20px;
+    }
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+    h1 {
+      text-align: center;
+      margin-bottom: 10px;
+      font-size: 2rem;
+    }
+    .subtitle {
+      text-align: center;
+      color: #888;
+      margin-bottom: 30px;
+    }
+    .stats {
+      text-align: center;
+      margin-bottom: 20px;
+      font-size: 14px;
+      color: #aaa;
+    }
+    /* 月份格子视图 */
+    .months-grid {
+      display: grid;
+      grid-template-columns: repeat(30, 1fr);
+      gap: 2px;
+      margin-bottom: 30px;
+    }
+    .month-cell {
+      aspect-ratio: 1;
+      background: #2a2a4a;
+      border-radius: 3px;
+      cursor: pointer;
+      transition: all 0.2s;
+      position: relative;
+    }
+    .month-cell:hover {
+      transform: scale(1.1);
+      z-index: 10;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+    }
+    .month-cell.filled {
+      background: var(--mood-color, #4a9eff);
+    }
+    /* 每天视图弹窗 */
+    .days-modal {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(0,0,0,0.8);
+      z-index: 100;
+      overflow-y: auto;
+      padding: 20px;
+    }
+    .days-modal.active {
+      display: block;
+    }
+    .days-modal-content {
+      background: #1a1a2e;
+      border-radius: 12px;
+      max-width: 800px;
+      margin: 40px auto;
+      padding: 20px;
+    }
+    .modal-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 20px;
+    }
+    .modal-header h2 {
+      font-size: 1.5rem;
+    }
+    .close-btn {
+      background: none;
+      border: none;
+      color: #fff;
+      font-size: 24px;
+      cursor: pointer;
+      padding: 5px 10px;
+    }
+    .days-grid {
+      display: grid;
+      grid-template-columns: repeat(31, 1fr);
+      gap: 3px;
+    }
+    .day-cell {
+      aspect-ratio: 1;
+      background: #2a2a4a;
+      border-radius: 3px;
+      cursor: pointer;
+      transition: all 0.2s;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 10px;
+      color: #666;
+    }
+    .day-cell:hover {
+      transform: scale(1.15);
+      z-index: 5;
+    }
+    .day-cell.filled {
+      color: #fff;
+      text-shadow: 0 1px 2px rgba(0,0,0,0.5);
+    }
+    /* 心情选择器 */
+    .mood-picker {
+      position: fixed;
+      display: none;
+      background: #2a2a4a;
+      border-radius: 8px;
+      padding: 10px;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.4);
+      z-index: 200;
+    }
+    .mood-picker.active {
+      display: block;
+    }
+    .mood-options {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      max-width: 200px;
+    }
+    .mood-option {
+      width: 30px;
+      height: 30px;
+      border-radius: 50%;
+      cursor: pointer;
+      border: 2px solid transparent;
+      transition: all 0.2s;
+    }
+    .mood-option:hover {
+      transform: scale(1.2);
+    }
+    .mood-option.selected {
+      border-color: #fff;
+    }
+    .mood-option.clear {
+      background: #2a2a4a;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 16px;
+    }
+    /* 颜色自定义 */
+    .custom-color-wrapper {
+      margin-top: 10px;
+      padding-top: 10px;
+      border-top: 1px solid #444;
+    }
+    .custom-color-wrapper label {
+      display: block;
+      font-size: 12px;
+      color: #888;
+      margin-bottom: 5px;
+    }
+    .custom-color-wrapper input[type="color"] {
+      width: 100%;
+      height: 30px;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+    .legend {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      justify-content: center;
+      margin-top: 20px;
+      padding: 15px;
+      background: rgba(255,255,255,0.05);
+      border-radius: 8px;
+    }
+    .legend-item {
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      font-size: 12px;
+    }
+    .legend-color {
+      width: 16px;
+      height: 16px;
+      border-radius: 50%;
+    }
+    @media (max-width: 768px) {
+      .months-grid {
+        grid-template-columns: repeat(15, 1fr);
+      }
+      .days-grid {
+        grid-template-columns: repeat(7, 1fr);
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>🌟 人生900个月</h1>
+    <p class="subtitle">每格一个月，点击查看每天</p>
+    <div class="stats" id="stats"></div>
+    
+    <div class="months-grid" id="monthsGrid"></div>
+    
+    <div class="legend" id="legend"></div>
+  </div>
+
+  <!-- 每天视图弹窗 -->
+  <div class="days-modal" id="daysModal">
+    <div class="days-modal-content">
+      <div class="modal-header">
+        <h2 id="monthTitle">2024年1月</h2>
+        <button class="close-btn" id="closeModal">×</button>
+      </div>
+      <div class="days-grid" id="daysGrid"></div>
+    </div>
+  </div>
+
+  <!-- 心情选择器 -->
+  <div class="mood-picker" id="moodPicker">
+    <div class="mood-options" id="moodOptions"></div>
+    <div class="custom-color-wrapper">
+      <label>自定义颜色</label>
+      <input type="color" id="customColor" value="#4a9eff">
+    </div>
+  </div>
+
+  <script>
+    // 心情颜色配置
+    const moods = [
+      { name: '开心', color: '#ffd93d' },
+      { name: '平静', color: '#6bcb77' },
+      { name: '难过', color: '#4d96ff' },
+      { name: '焦虑', color: '#ff6b6b' },
+      { name: '疲惫', color: '#95a5a6' },
+      { name: '期待', color: '#a29bfe' },
+      { name: '充实', color: '#00b894' },
+      { name: '无聊', color: '#636e72' },
+    ];
+
+    const STORAGE_KEY = 'life_900_months';
+    let currentYear = new Date().getFullYear();
+    let data = {};
+
+    // 初始化
+    function init() {
+      loadData();
+      renderMonthsGrid();
+      renderLegend();
+      updateStats();
+      setupEventListeners();
+    }
+
+    // 加载数据
+    function loadData() {
+      const saved = localStorage.getItem(STORAGE_KEY);
+      if (saved) {
+        data = JSON.parse(saved);
+      }
+    }
+
+    // 保存数据
+    function saveData() {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+      updateStats();
+    }
+
+    // 渲染月份格子
+    function renderMonthsGrid() {
+      const grid = document.getElementById('monthsGrid');
+      grid.innerHTML = '';
+      
+      for (let i = 0; i < 900; i++) {
+        const cell = document.createElement('div');
+        cell.className = 'month-cell';
+        cell.dataset.monthIndex = i;
+        
+        const year = Math.floor(i / 12);
+        const month = i % 12;
+        const key = `${year}-${month}`;
+        
+        if (data[key]) {
+          cell.classList.add('filled');
+          cell.style.setProperty('--mood-color', data[key].color);
+        }
+        
+        grid.appendChild(cell);
+      }
+    }
+
+    // 渲染图例
+    function renderLegend() {
+      const legend = document.getElementById('legend');
+      legend.innerHTML = moods.map(m => `
+        <div class="legend-item">
+          <div class="legend-color" style="background: ${m.color}"></div>
+          <span>${m.name}</span>
+        </div>
+      `).join('');
+    }
+
+    // 渲染某月的天数
+    function renderDaysGrid(monthIndex) {
+      const grid = document.getElementById('daysGrid');
+      grid.innerHTML = '';
+      
+      const year = Math.floor(monthIndex / 12);
+      const month = monthIndex % 12;
+      const daysInMonth = new Date(currentYear + year, month + 1, 0).getDate();
+      
+      document.getElementById('monthTitle').textContent = `${currentYear + year}年${month + 1}月`;
+      
+      for (let day = 1; day <= daysInMonth; day++) {
+        const cell = document.createElement('div');
+        cell.className = 'day-cell';
+        cell.textContent = day;
+        cell.dataset.day = day;
+        
+        const key = `${monthIndex}-${day}`;
+        if (data[key]) {
+          cell.classList.add('filled');
+          cell.style.background = data[key].color;
+        }
+        
+        grid.appendChild(cell);
+      }
+    }
+
+    // 统计
+    function updateStats() {
+      let filled = 0;
+      Object.keys(data).forEach(key => {
+        if (key.includes('-')) filled++;
+      });
+      
+      document.getElementById('stats').textContent = 
+        `已填写 ${filled} 天 / 共 27000 天 (75年)`;
+    }
+
+    // 事件监听
+    function setupEventListeners() {
+      // 点击月份
+      document.getElementById('monthsGrid').addEventListener('click', (e) => {
+        const cell = e.target.closest('.month-cell');
+        if (cell) {
+          const monthIndex = parseInt(cell.dataset.monthIndex);
+          renderDaysGrid(monthIndex);
+          document.getElementById('daysModal').classList.add('active');
+        }
+      });
+
+      // 关闭弹窗
+      document.getElementById('closeModal').addEventListener('click', () => {
+        document.getElementById('daysModal').classList.remove('active');
+      });
+
+      document.getElementById('daysModal').addEventListener('click', (e) => {
+        if (e.target.id === 'daysModal') {
+          document.getElementById('daysModal').classList.remove('active');
+        }
+      });
+
+      // 点击天数
+      let selectedDayKey = null;
+      document.getElementById('daysGrid').addEventListener('click', (e) => {
+        const cell = e.target.closest('.day-cell');
+        if (cell) {
+          selectedDayKey = cell.dataset.day;
+          showMoodPicker(e.clientX, e.clientY, cell);
+        }
+      });
+
+      // 心情选择
+      renderMoodOptions();
+      
+      document.getElementById('customColor').addEventListener('change', (e) => {
+        if (selectedDayKey) {
+          const modal = document.getElementById('daysModal');
+          const monthTitle = document.getElementById('monthTitle').textContent;
+          const monthMatch = monthTitle.match(/(\d+)年(\d+)月/);
+          if (monthMatch) {
+            const year = parseInt(monthMatch[1]) - currentYear;
+            const month = parseInt(monthMatch[2]) - 1;
+            const monthIndex = year * 12 + month;
+            const key = `${monthIndex}-${selectedDayKey}`;
+            
+            if (e.target.value) {
+              data[key] = { color: e.target.value };
+            } else {
+              delete data[key];
+            }
+            saveData();
+            renderDaysGrid(monthIndex);
+            renderMonthsGrid();
+          }
+        }
+      });
+    }
+
+    function renderMoodOptions() {
+      const container = document.getElementById('moodOptions');
+      container.innerHTML = `
+        <div class="mood-option clear" data-color="">🧹</div>
+        ${moods.map(m => `
+          <div class="mood-option" data-color="${m.color}" style="background: ${m.color}" title="${m.name}"></div>
+        `).join('')}
+      `;
+      
+      container.addEventListener('click', (e) => {
+        const option = e.target.closest('.mood-option');
+        if (option) {
+          const color = option.dataset.color;
+          applyMoodColor(color);
+        }
+      });
+    }
+
+    let pendingDayKey = null;
+    let pendingMonthIndex = null;
+
+    function showMoodPicker(x, y, cell) {
+      const picker = document.getElementById('moodPicker');
+      picker.classList.add('active');
+      
+      // 确保不超出屏幕
+      const rect = picker.getBoundingClientRect();
+      let left = x;
+      let top = y;
+      
+      if (left + 220 > window.innerWidth) left = window.innerWidth - 230;
+      if (top + 200 > window.innerHeight) top = window.innerHeight - 210;
+      
+      picker.style.left = left + 'px';
+      picker.style.top = top + 'px';
+      
+      // 记录当前选择的 day
+      const modal = document.getElementById('daysModal');
+      const monthTitle = document.getElementById('monthTitle').textContent;
+      const monthMatch = monthTitle.match(/(\d+)年(\d+)月/);
+      if (monthMatch) {
+        const year = parseInt(monthMatch[1]) - currentYear;
+        const month = parseInt(monthMatch[2]) - 1;
+        pendingMonthIndex = year * 12 + month;
+        pendingDayKey = cell.dataset.day;
+      }
+    }
+
+    function applyMoodColor(color) {
+      if (!pendingDayKey || pendingMonthIndex === null) return;
+      
+      const key = `${pendingMonthIndex}-${pendingDayKey}`;
+      
+      if (color) {
+        data[key] = { color };
+      } else {
+        delete data[key];
+      }
+      
+      saveData();
+      renderDaysGrid(pendingMonthIndex);
+      renderMonthsGrid();
+      
+      document.getElementById('moodPicker').classList.remove('active');
+    }
+
+    // 点击其他地方关闭心情选择器
+    document.addEventListener('click', (e) => {
+      const picker = document.getElementById('moodPicker');
+      if (!picker.contains(e.target) && !e.target.closest('.day-cell')) {
+        picker.classList.remove('active');
+      }
+    });
+
+    init();
+  </script>
+</body>
+</html>
