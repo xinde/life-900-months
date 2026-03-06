@@ -6,479 +6,156 @@
   <title>人生900个月</title>
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; }
-    body {
-      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-      min-height: 100vh;
-      background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
-      color: #fff; padding: 20px;
-    }
-    .container { max-width: 1200px; margin: 0 auto; }
+    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; min-height: 100vh; background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%); color: #fff; padding: 20px; }
+    .container { max-width: 1400px; margin: 0 auto; }
     h1 { text-align: center; margin-bottom: 10px; font-size: 2rem; }
     .subtitle { text-align: center; color: #888; margin-bottom: 30px; }
     .stats { text-align: center; margin-bottom: 20px; font-size: 14px; color: #aaa; }
-    
-    /* 出生年月输入 */
-    .birth-input-wrapper {
-      background: #2a2a4a;
-      border-radius: 12px;
-      padding: 20px;
-      margin-bottom: 30px;
-      text-align: center;
-    }
+    .birth-input-wrapper { background: #2a2a4a; border-radius: 12px; padding: 20px; margin-bottom: 30px; text-align: center; }
     .birth-input-wrapper h2 { font-size: 1.2rem; margin-bottom: 15px; }
     .birth-input-group { display: flex; gap: 10px; justify-content: center; flex-wrap: wrap; }
-    .birth-input-group select {
-      padding: 10px 15px;
-      border-radius: 8px;
-      border: 1px solid #444;
-      background: #1a1a2e;
-      color: #fff;
-      font-size: 14px;
-    }
-    .birth-input-group button {
-      padding: 10px 25px;
-      border-radius: 8px;
-      border: none;
-      background: #4a9eff;
-      color: #fff;
-      font-size: 14px;
-      cursor: pointer;
-      transition: all 0.2s;
-    }
-    .birth-input-group button:hover { background: #3a8eef; }
+    .birth-input-group select { padding: 10px 15px; border-radius: 8px; border: 1px solid #444; background: #1a1a2e; color: #fff; font-size: 14px; }
+    .birth-input-group button { padding: 10px 25px; border-radius: 8px; border: none; background: #4a9eff; color: #fff; font-size: 14px; cursor: pointer; }
     
-    /* 年份行 */
-    .year-row {
-      display: flex;
-      align-items: center;
-      margin-bottom: 8px;
-    }
-    .year-label {
-      width: 60px;
-      font-size: 14px;
-      color: #888;
-      flex-shrink: 0;
-    }
-    .year-months {
-      display: grid;
-      grid-template-columns: repeat(12, 1fr);
-      gap: 4px;
-      flex: 1;
-    }
+    .year-row { display: flex; align-items: center; margin-bottom: 6px; }
+    .year-label { width: 70px; font-size: 14px; color: #888; flex-shrink: 0; text-align: right; padding-right: 10px; }
+    .year-months { display: grid; grid-template-columns: repeat(12, 1fr); gap: 3px; flex: 1; }
     
-    /* 月份格子 */
     .month-cell {
-      aspect-ratio: 1;
+      aspect-ratio: 1.2;
       background: #2a2a4a;
       border-radius: 4px;
       cursor: pointer;
       transition: all 0.2s;
       display: flex;
+      flex-direction: column;
       align-items: center;
       justify-content: center;
-      font-size: 12px;
+      font-size: 11px;
       color: #555;
       position: relative;
+      min-height: 32px;
     }
-    .month-cell:hover {
-      transform: scale(1.1);
-      z-index: 10;
-      box-shadow: 0 4px 15px rgba(0,0,0,0.3);
-    }
-    .month-cell.filled {
-      color: #fff;
-      text-shadow: 0 1px 2px rgba(0,0,0,0.5);
-    }
-    .month-cell.empty-year {
-      background: #1a1a2e;
-      border: 1px dashed #333;
-    }
+    .month-cell:hover { transform: scale(1.08); z-index: 10; box-shadow: 0 4px 15px rgba(0,0,0,0.3); }
+    .month-cell.filled { color: #fff; text-shadow: 0 1px 2px rgba(0,0,0,0.5); }
+    .month-cell.empty-year { background: #1a1a2e; border: 1px dashed #333; }
+    .month-cell .month-num { font-size: 10px; opacity: 0.6; }
+    .month-cell .month-score { font-size: 14px; font-weight: bold; }
     
-    /* 每天视图弹窗 */
-    .days-modal { display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.8); z-index: 100; overflow-y: auto; padding: 20px; }
+    .days-modal { display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.85); z-index: 100; overflow-y: auto; padding: 20px; }
     .days-modal.active { display: block; }
-    .days-modal-content { background: #1a1a2e; border-radius: 12px; max-width: 800px; margin: 40px auto; padding: 20px; }
+    .days-modal-content { background: #1a1a2e; border-radius: 12px; max-width: 600px; margin: 40px auto; padding: 20px; }
     .modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
     .modal-header h2 { font-size: 1.5rem; }
-    .close-btn { background: none; border: none; color: #fff; font-size: 24px; cursor: pointer; padding: 5px 10px; }
+    .close-btn { background: none; border: none; color: #fff; font-size: 24px; cursor: pointer; }
     .days-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 4px; }
     .day-cell { aspect-ratio: 1; background: #2a2a4a; border-radius: 3px; cursor: pointer; transition: all 0.2s; display: flex; align-items: center; justify-content: center; font-size: 11px; color: #666; }
-    .day-cell:hover { transform: scale(1.15); z-index: 5; }
+    .day-cell:hover { transform: scale(1.15); }
     .day-cell.filled { color: #fff; text-shadow: 0 1px 2px rgba(0,0,0,0.5); }
     
-    /* 心情选择器 */
     .mood-picker { position: fixed; display: none; background: #2a2a4a; border-radius: 12px; padding: 15px; box-shadow: 0 4px 20px rgba(0,0,0,0.4); z-index: 200; }
     .mood-picker.active { display: block; }
-    .mood-options { display: flex; gap: 10px; flex-wrap: wrap; max-width: 280px; }
-    .mood-option { 
-      width: 50px; height: 50px; border-radius: 8px; cursor: pointer; border: 2px solid transparent; 
-      transition: all 0.2s; display: flex; flex-direction: column; align-items: center; justify-content: center;
-    }
+    .mood-options { display: flex; gap: 8px; flex-wrap: wrap; max-width: 300px; }
+    .mood-option { width: 55px; height: 55px; border-radius: 8px; cursor: pointer; border: 2px solid transparent; transition: all 0.2s; display: flex; flex-direction: column; align-items: center; justify-content: center; }
     .mood-option:hover { transform: scale(1.1); }
-    .mood-option.selected { border-color: #fff; }
     .mood-option .mood-name { font-size: 10px; color: #fff; margin-top: 2px; text-shadow: 0 1px 2px rgba(0,0,0,0.5); }
     .mood-option.clear { background: #1a1a2e; border: 1px dashed #444; font-size: 12px; color: #888; }
     
-    /* 图例 */
-    .legend { display: flex; flex-wrap: wrap; gap: 10px; justify-content: center; margin-top: 30px; padding: 15px; background: rgba(255,255,255,0.05); border-radius: 8px; }
+    .legend { display: flex; flex-wrap: wrap; gap: 12px; justify-content: center; margin-top: 30px; padding: 15px; background: rgba(255,255,255,0.05); border-radius: 8px; }
     .legend-item { display: flex; align-items: center; gap: 5px; font-size: 12px; }
     .legend-color { width: 16px; height: 16px; border-radius: 4px; }
     
-    @media (max-width: 768px) {
-      .year-months { grid-template-columns: repeat(6, 1fr); }
-      .year-label { width: 45px; font-size: 12px; }
-      .mood-options { max-width: 200px; }
-      .mood-option { width: 40px; height: 40px; }
-    }
+    @media (max-width: 900px) { .year-months { grid-template-columns: repeat(6, 1fr); } .year-label { width: 50px; font-size: 12px; } }
   </style>
 </head>
 <body>
   <div class="container">
     <h1>🌟 人生900个月</h1>
     <p class="subtitle">每格一个月，点击查看每天</p>
-    
-    <!-- 出生年月输入 -->
     <div class="birth-input-wrapper" id="birthInput">
       <h2>请输入你的出生年月</h2>
       <div class="birth-input-group">
         <select id="birthYear"></select>
-        <select id="birthMonth">
-          <option value="">请选择月份</option>
-        </select>
+        <select id="birthMonth"><option value="">请选择月份</option></select>
         <button onclick="confirmBirth()">开始</button>
       </div>
     </div>
-    
-    <div class="stats" id="stats" style="display: none;"></div>
-    <div id="gridContainer" style="display: none;"></div>
-    <div class="legend" id="legend" style="display: none;"></div>
+    <div class="stats" id="stats" style="display:none"></div>
+    <div id="gridContainer" style="display:none"></div>
+    <div class="legend" id="legend" style="display:none"></div>
   </div>
-
-  <!-- 每天视图弹窗 -->
+  
   <div class="days-modal" id="daysModal">
     <div class="days-modal-content">
-      <div class="modal-header">
-        <h2 id="monthTitle">2024年1月</h2>
-        <button class="close-btn" id="closeModal">×</button>
-      </div>
+      <div class="modal-header"><h2 id="monthTitle">2024年1月</h2><button class="close-btn" id="closeModal">×</button></div>
       <div class="days-grid" id="daysGrid"></div>
     </div>
   </div>
-
-  <!-- 心情选择器 -->
-  <div class="mood-picker" id="moodPicker">
-    <div class="mood-options" id="moodOptions"></div>
-  </div>
-
+  
+  <div class="mood-picker" id="moodPicker"><div class="mood-options" id="moodOptions"></div></div>
+  
   <script>
     const moods = [
-      { name: '开心', color: '#ffd93d' },
-      { name: '平静', color: '#6bcb77' },
-      { name: '难过', color: '#4d96ff' },
-      { name: '焦虑', color: '#ff6b6b' },
-      { name: '疲惫', color: '#95a5a6' },
-      { name: '期待', color: '#a29bfe' },
-      { name: '充实', color: '#00b894' },
-      { name: '无聊', color: '#636e72' },
+      {name:'开心',color:'#ffd93d',score:100},
+      {name:'平静',color:'#6bcb77',score:80},
+      {name:'期待',color:'#a29bfe',score:90},
+      {name:'充实',color:'#00b894',score:85},
+      {name:'难过',color:'#4d96ff',score:40},
+      {name:'焦虑',color:'#ff6b6b',score:30},
+      {name:'疲惫',color:'#95a5a6',score:50},
+      {name:'无聊',color:'#636e72',score:45}
     ];
-
-    const STORAGE_KEY = 'life_900_months_v2';
-    let birthYear, birthMonth;
-    let data = {};
-
-    // 初始化
-    function init() {
-      loadData();
-      setupBirthInput();
-      renderMoodOptions();
-    }
-
-    // 加载数据
-    function loadData() {
-      const saved = localStorage.getItem(STORAGE_KEY);
-      if (saved) {
-        const parsed = JSON.parse(saved);
-        data = parsed.data || {};
-        birthYear = parsed.birthYear;
-        birthMonth = parsed.birthMonth;
-        if (birthYear && birthMonth) {
-          showGrid();
-        }
+    const moodMap = {};
+    moods.forEach(m => moodMap[m.color] = m);
+    
+    const STORAGE_KEY = 'life_900_months_v3';
+    let birthYear,birthMonth,data={};
+    
+    function init(){loadData();setupBirthInput();renderMoodOptions();}
+    function loadData(){const s=localStorage.getItem(STORAGE_KEY);if(s){const p=JSON.parse(s);data=p.data||{};birthYear=p.birthYear;birthMonth=p.birthMonth;if(birthYear&&birthMonth)showGrid();}}
+    function saveData(){localStorage.setItem(STORAGE_KEY,JSON.stringify({data,birthYear,birthMonth}));updateStats();}
+    function setupBirthInput(){const ys=document.getElementById('birthYear'),ms=document.getElementById('birthMonth'),cy=new Date().getFullYear();for(let y=cy;y>=1900;y--){const o=document.createElement('option');o.value=y;o.textContent=y+'年';ys.appendChild(o);}for(let m=1;m<=12;m++){const o=document.createElement('option');o.value=m;o.textContent=m+'月';ms.appendChild(o);}if(birthYear&&birthMonth){ys.value=birthYear;ms.value=birthMonth;}}
+    function confirmBirth(){birthYear=parseInt(document.getElementById('birthYear').value);birthMonth=parseInt(document.getElementById('birthMonth').value);if(!birthYear||!birthMonth){alert('请选择出生年份和月份');return;}saveData();showGrid();}
+    function showGrid(){document.getElementById('birthInput').style.display='none';document.getElementById('stats').style.display='block';document.getElementById('gridContainer').style.display='block';document.getElementById('legend').style.display='flex';renderGrid();renderLegend();updateStats();}
+    
+    function calcMonthColor(yearIndex, month) {
+      const days = [];
+      for(let d=1; d<=31; d++) {
+        const key = yearIndex + '-' + month + '-' + d;
+        if(data[key]) days.push(data[key].color);
       }
-    }
-
-    // 保存数据
-    function saveData() {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify({ data, birthYear, birthMonth }));
-      updateStats();
-    }
-
-    // 设置出生年月输入
-    function setupBirthInput() {
-      const yearSelect = document.getElementById('birthYear');
-      const monthSelect = document.getElementById('birthMonth');
-      const currentYear = new Date().getFullYear();
+      if(days.length === 0) return null;
       
-      // 年份选项 (1900 - 今年)
-      for (let y = currentYear; y >= 1900; y--) {
-        const opt = document.createElement('option');
-        opt.value = y;
-        opt.textContent = y + '年';
-        yearSelect.appendChild(opt);
-      }
-      
-      // 月份选项
-      for (let m = 1; m <= 12; m++) {
-        const opt = document.createElement('option');
-        opt.value = m;
-        opt.textContent = m + '月';
-        monthSelect.appendChild(opt);
-      }
-      
-      // 如果已有保存的出生年月
-      if (birthYear && birthMonth) {
-        yearSelect.value = birthYear;
-        monthSelect.value = birthMonth;
-      }
-    }
-
-    // 确认出生年月
-    function confirmBirth() {
-      birthYear = parseInt(document.getElementById('birthYear').value);
-      birthMonth = parseInt(document.getElementById('birthMonth').value);
-      
-      if (!birthYear || !birthMonth) {
-        alert('请选择出生年份和月份');
-        return;
-      }
-      
-      saveData();
-      showGrid();
-    }
-
-    // 显示网格
-    function showGrid() {
-      document.getElementById('birthInput').style.display = 'none';
-      document.getElementById('stats').style.display = 'block';
-      document.getElementById('gridContainer').style.display = 'block';
-      document.getElementById('legend').style.display = 'flex';
-      
-      renderGrid();
-      renderLegend();
-      updateStats();
-    }
-
-    // 渲染网格
-    function renderGrid() {
-      const container = document.getElementById('gridContainer');
-      container.innerHTML = '';
-      
-      const currentYear = new Date().getFullYear();
-      const totalYears = 75; // 75年
-      const startYear = birthYear;
-      
-      for (let y = 0; y < totalYears; y++) {
-        const year = startYear + y;
-        if (year > currentYear + 10) break; // 不要显示太远的未来
-        
-        const yearRow = document.createElement('div');
-        yearRow.className = 'year-row';
-        
-        const yearLabel = document.createElement('div');
-        yearLabel.className = 'year-label';
-        yearLabel.textContent = year + '年';
-        
-        const monthsDiv = document.createElement('div');
-        monthsDiv.className = 'year-months';
-        
-        for (let m = 1; m <= 12; m++) {
-          const cell = document.createElement('div');
-          cell.className = 'month-cell';
-          
-          // 如果是出生前的月份，显示空白
-          if (y === 0 && m < birthMonth) {
-            cell.classList.add('empty-year');
-            cell.textContent = m;
-            cell.style.color = '#333';
-          } else {
-            cell.textContent = m;
-            cell.dataset.year = y;
-            cell.dataset.month = m;
-            
-            const key = `${y}-${m}`;
-            if (data[key]) {
-              cell.classList.add('filled');
-              cell.style.background = data[key].color;
-            }
-          }
-          
-          monthsDiv.appendChild(cell);
-        }
-        
-        yearRow.appendChild(yearLabel);
-        yearRow.appendChild(monthsDiv);
-        container.appendChild(yearRow);
-      }
-    }
-
-    // 渲染图例
-    function renderLegend() {
-      document.getElementById('legend').innerHTML = moods.map(m => `
-        <div class="legend-item">
-          <div class="legend-color" style="background:${m.color}"></div>
-          <span>${m.name}</span>
-        </div>
-      `).join('');
-    }
-
-    // 渲染某月的天数
-    function renderDaysGrid(yearIndex, month) {
-      const grid = document.getElementById('daysGrid');
-      grid.innerHTML = '';
-      
-      const year = birthYear + yearIndex;
-      const daysInMonth = new Date(year, month, 0).getDate();
-      
-      document.getElementById('monthTitle').textContent = `${year}年${month}月`;
-      
-      for (let day = 1; day <= daysInMonth; day++) {
-        const cell = document.createElement('div');
-        cell.className = 'day-cell';
-        cell.textContent = day;
-        cell.dataset.day = day;
-        
-        const key = `${yearIndex}-${month}-${day}`;
-        if (data[key]) {
-          cell.classList.add('filled');
-          cell.style.background = data[key].color;
-        }
-        
-        grid.appendChild(cell);
-      }
-    }
-
-    // 统计
-    function updateStats() {
-      let filled = 0;
-      Object.keys(data).forEach(key => {
-        if (key.includes('-')) filled++;
+      let r=0,g=0,b=0;
+      days.forEach(c => {
+        const hex = c.replace('#','');
+        r += parseInt(hex.substr(0,2),16);
+        g += parseInt(hex.substr(2,2),16);
+        b += parseInt(hex.substr(4,2),16);
       });
+      r = Math.round(r/days.length);
+      g = Math.round(g/days.length);
+      b = Math.round(b/days.length);
       
-      document.getElementById('stats').textContent = 
-        `已填写 ${filled} 天 / 共 27000 天 (75年)`;
+      let score = 0;
+      days.forEach(c => {
+        if(moodMap[c]) score += moodMap[c].score;
+      });
+      score = Math.round(score/days.length);
+      
+      return {color: '#' + r.toString(16).padStart(2,'0') + g.toString(16).padStart(2,'0') + b.toString(16).padStart(2,'0'), score};
     }
-
-    // 心情选项渲染（带文字）
-    function renderMoodOptions() {
-      const container = document.getElementById('moodOptions');
-      container.innerHTML = `
-        <div class="mood-option clear" data-color="">清除</div>
-        ${moods.map(m => `
-          <div class="mood-option" data-color="${m.color}" style="background:${m.color}" title="${m.name}">
-            <span class="mood-name">${m.name}</span>
-          </div>
-        `).join('')}
-      `;
-      
-      container.addEventListener('click', (e) => {
-        const option = e.target.closest('.mood-option');
-        if (option) {
-          applyMoodColor(option.dataset.color);
-        }
-      });
-    }
-
-    let pendingKey = null;
-
-    function showMoodPicker(x, y, key) {
-      const picker = document.getElementById('moodPicker');
-      picker.classList.add('active');
-      pendingKey = key;
-      
-      // 确保不超出屏幕
-      let left = x, top = y;
-      if (left + 300 > window.innerWidth) left = window.innerWidth - 310;
-      if (top + 150 > window.innerHeight) top = window.innerHeight - 160;
-      
-      picker.style.left = left + 'px';
-      picker.style.top = top + 'px';
-    }
-
-    function applyMoodColor(color) {
-      if (!pendingKey) return;
-      
-      if (color) {
-        data[pendingKey] = { color };
-      } else {
-        delete data[pendingKey];
-      }
-      
-      saveData();
-      
-      // 重新渲染
-      if (pendingKey.includes('-') && pendingKey.split('-').length === 3) {
-        // 是天数
-        const parts = pendingKey.split('-');
-        renderDaysGrid(parseInt(parts[0]), parseInt(parts[1]));
-      }
-      renderGrid();
-      
-      document.getElementById('moodPicker').classList.remove('active');
-    }
-
-    // 事件监听
-    function setupEventListeners() {
-      // 点击月份格子
-      document.getElementById('gridContainer').addEventListener('click', (e) => {
-        const cell = e.target.closest('.month-cell');
-        if (cell && !cell.classList.contains('empty-year')) {
-          const yearIndex = parseInt(cell.dataset.year);
-          const month = parseInt(cell.dataset.month);
-          renderDaysGrid(yearIndex, month);
-          document.getElementById('daysModal').classList.add('active');
-        }
-      });
-
-      // 关闭弹窗
-      document.getElementById('closeModal').addEventListener('click', () => {
-        document.getElementById('daysModal').classList.remove('active');
-      });
-
-      document.getElementById('daysModal').addEventListener('click', (e) => {
-        if (e.target.id === 'daysModal') {
-          document.getElementById('daysModal').classList.remove('active');
-        }
-      });
-
-      // 点击天数
-      document.getElementById('daysGrid').addEventListener('click', (e) => {
-        const cell = e.target.closest('.day-cell');
-        if (cell) {
-          const day = cell.dataset.day;
-          const monthTitle = document.getElementById('monthTitle').textContent;
-          const match = monthTitle.match(/(\d+)年(\d+)月/);
-          if (match) {
-            const year = parseInt(match[1]);
-            const month = parseInt(match[2]);
-            const yearIndex = year - birthYear;
-            const key = `${yearIndex}-${month}-${day}`;
-            showMoodPicker(e.clientX, e.clientY, key);
-          }
-        }
-      });
-
-      // 点击其他地方关闭心情选择器
-      document.addEventListener('click', (e) => {
-        const picker = document.getElementById('moodPicker');
-        if (!picker.contains(e.target) && !e.target.closest('.day-cell') && !e.target.closest('.month-cell')) {
-          picker.classList.remove('active');
-        }
-      });
-    }
-
-    // 启动
-    init();
-    setupEventListeners();
+    
+    function renderGrid(){const c=document.getElementById('gridContainer');c.innerHTML='';const cy=new Date().getFullYear(),ty=75,sy=birthYear;for(let y=0;y<ty;y++){const yr=sy+y;if(yr>cy+10)break;const r=document.createElement('div');r.className='year-row';r.innerHTML='<div class="year-label">'+yr+'年</div>';const md=document.createElement('div');md.className='year-months';for(let m=1;m<=12;m++){const cell=document.createElement('div');cell.className='month-cell';if(y===0&&m<birthMonth){cell.classList.add('empty-year');cell.textContent=m;cell.style.color='#333';}else{const mc=calcMonthColor(y,m);if(mc){cell.classList.add('filled');cell.style.background=mc.color;cell.innerHTML='<span class="month-num">'+m+'</span><span class="month-score">'+mc.score+'</span>';}else{cell.textContent=m;cell.dataset.year=y;cell.dataset.month=m;}}cell.dataset.year=y;cell.dataset.month=m;md.appendChild(cell);}r.appendChild(md);c.appendChild(r);}}
+    function renderLegend(){document.getElementById('legend').innerHTML=moods.map(m=>'<div class="legend-item"><div class="legend-color" style="background:'+m.color+'"></div><span>'+m.name+' ('+m.score+'分)</span></div>').join('');}
+    function renderDaysGrid(yi,m){const g=document.getElementById('daysGrid');g.innerHTML='';const y=birthYear+yi,dim=new Date(y,m,0).getDate();document.getElementById('monthTitle').textContent=y+'年'+m+'月';for(let d=1;d<=dim;d++){const c=document.createElement('div');c.className='day-cell';c.textContent=d;c.dataset.day=d;const k=yi+'-'+m+'-'+d;if(data[k]){c.classList.add('filled');c.style.background=data[k].color;}g.appendChild(c);}}
+    function updateStats(){let f=0;Object.keys(data).forEach(k=>{if(k.includes('-'))f++});document.getElementById('stats').textContent='已填写 '+f+' 天 / 共 27000 天 (75年)';}
+    function renderMoodOptions(){document.getElementById('moodOptions').innerHTML='<div class="mood-option clear" data-color="">清除</div>'+moods.map(m=>'<div class="mood-option" data-color="'+m.color+'" style="background:'+m.color+'"><span class="mood-name">'+m.name+'</span></div>').join('');document.getElementById('moodOptions').addEventListener('click',e=>{const o=e.target.closest('.mood-option');if(o)applyMoodColor(o.dataset.color);});}
+    let pendingKey=null;
+    function showMoodPicker(x,y,k){const p=document.getElementById('moodPicker');p.classList.add('active');pendingKey=k;let l=x,t=y;if(l+320>window.innerWidth)l=window.innerWidth-330;if(t+160>window.innerHeight)t=window.innerHeight-170;p.style.left=l+'px';p.style.top=t+'px';}
+    function applyMoodColor(c){if(!pendingKey)return;if(c)data[pendingKey]={color:c};else delete data[pendingKey];saveData();if(pendingKey.split('-').length===3){const p=pendingKey.split('-');renderDaysGrid(parseInt(p[0]),parseInt(p[1]));}renderGrid();document.getElementById('moodPicker').classList.remove('active');}
+    function setupEventListeners(){document.getElementById('gridContainer').addEventListener('click',e=>{const c=e.target.closest('.month-cell');if(c&&!c.classList.contains('empty-year')){renderDaysGrid(parseInt(c.dataset.year),parseInt(c.dataset.month));document.getElementById('daysModal').classList.add('active');}});document.getElementById('closeModal').addEventListener('click',()=>document.getElementById('daysModal').classList.remove('active'));document.getElementById('daysModal').addEventListener('click',e=>{if(e.target.id==='daysModal')document.getElementById('daysModal').classList.remove('active');});document.getElementById('daysGrid').addEventListener('click',e=>{const c=e.target.closest('.day-cell');if(c){const d=c.dataset.day,m=document.getElementById('monthTitle').textContent.match(/(\d+)年(\d+)月/);if(m){showMoodPicker(e.clientX,e.clientY,(parseInt(m[1])-birthYear)+'-'+m[2]+'-'+d);}}});document.addEventListener('click',e=>{const p=document.getElementById('moodPicker');if(!p.contains(e.target)&&!e.target.closest('.day-cell')&&!e.target.closest('.month-cell'))p.classList.remove('active');});}
+    init();setupEventListeners();
   </script>
 </body>
 </html>
