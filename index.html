@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>人生900个月</title>
+  <title>人生不过九百个月</title>
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; }
     body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; min-height: 100vh; background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%); color: #fff; padding: 20px; }
@@ -52,33 +52,12 @@
     .day-cell { aspect-ratio: 1; background: #2a2a4a; border-radius: 3px; cursor: pointer; transition: all 0.2s; display: flex; align-items: center; justify-content: center; font-size: 11px; color: #666; }
     .day-cell:hover { transform: scale(1.15); }
     .day-cell.filled { color: #fff; text-shadow: 0 1px 2px rgba(0,0,0,0.5); }
+    .day-cell.selected { background: #fff !important; box-shadow: 0 0 10px rgba(255,255,255,0.8); }
     
-    .mood-picker {
-      position: fixed;
-      display: none;
-      background: #2a2a4a;
-      border-radius: 16px 16px 0 0;
-      padding: 20px;
-      box-shadow: 0 -4px 20px rgba(0,0,0,0.4);
-      z-index: 200;
-      left: 0;
-      right: 0;
-      bottom: 0;
-      transform: translateY(100%);
-      transition: transform 0.3s ease;
-    }
-    .mood-picker.active {
-      display: block;
-      transform: translateY(0);
-    }
-    .mood-options {
-      display: flex;
-      gap: 8px;
-      flex-wrap: wrap;
-      justify-content: center;
-      max-width: 400px;
-      margin: 0 auto;
-    }
+    .mood-picker { position: fixed; display: none; background: #2a2a4a; border-radius: 12px 12px 0 0; padding: 15px; box-shadow: 0 -4px 20px rgba(0,0,0,0.4); z-index: 200; bottom: 0; left: 0; right: 0; max-height: 50vh; overflow-y: auto; }
+    .mood-picker.active { display: block; }
+    .mood-close { position: absolute; top: 10px; right: 10px; background: none; border: none; color: #fff; font-size: 24px; cursor: pointer; }
+    .mood-options { display: flex; gap: 8px; flex-wrap: wrap; max-width: auto; }
     .mood-option { width: 70px; height: 60px; border-radius: 8px; cursor: pointer; border: 2px solid transparent; transition: all 0.2s; display: flex; flex-direction: column; align-items: center; justify-content: center; }
     .mood-option:hover { transform: scale(1.1); }
     .mood-option .mood-name { font-size: 11px; color: #fff; margin-top: 2px; text-shadow: 0 1px 2px rgba(0,0,0,0.5); }
@@ -94,7 +73,7 @@
 </head>
 <body>
   <div class="container">
-    <h1>🌟 人生900个月</h1>
+    <h1>🌟 人生不过九百个月</h1>
     <p class="subtitle">每格一个月，点击查看每天</p>
     <div class="birth-input-wrapper" id="birthInput">
       <h2>请输入你的出生年月</h2>
@@ -116,7 +95,7 @@
     </div>
   </div>
   
-  <div class="mood-picker" id="moodPicker"><div class="mood-options" id="moodOptions"></div></div>
+  <div class="mood-picker" id="moodPicker"><button class="mood-close" onclick="document.getElementById('moodPicker').classList.remove('active')">×</button><div class="mood-options" id="moodOptions"></div></div>
   
   <script>
     const moods = [
@@ -175,12 +154,8 @@
     function renderDaysGrid(yi,m){const g=document.getElementById('daysGrid');g.innerHTML='';const y=birthYear+yi,dim=new Date(y,m,0).getDate();document.getElementById('monthTitle').textContent=y+'年'+m+'月';for(let d=1;d<=dim;d++){const c=document.createElement('div');c.className='day-cell';c.textContent=d;c.dataset.day=d;const k=yi+'-'+m+'-'+d;if(data[k]){c.classList.add('filled');c.style.background=data[k].color;}g.appendChild(c);}}
     function updateStats(){let f=0;Object.keys(data).forEach(k=>{if(k.includes('-'))f++});document.getElementById('stats').textContent='已填写 '+f+' 天 / 共 27000 天 (75年)';}
     function renderMoodOptions(){document.getElementById('moodOptions').innerHTML='<div class="mood-option clear" data-color="">清除</div>'+moods.map(m=>'<div class="mood-option" data-color="'+m.color+'" style="background:'+m.color+'"><span class="mood-name">'+m.name+'</span><span class="mood-score">'+m.score+'分</span></div>').join('');document.getElementById('moodOptions').addEventListener('click',e=>{const o=e.target.closest('.mood-option');if(o)applyMoodColor(o.dataset.color);});}
-    let pendingKey = null;
-    function showMoodPicker(x, y, k) {
-      const p = document.getElementById('moodPicker');
-      p.classList.add('active');
-      pendingKey = k;
-    }
+    let pendingKey=null;
+    function showMoodPicker(x,y,k){const p=document.getElementById('moodPicker');p.classList.add('active');pendingKey=k;document.querySelectorAll('.day-cell').forEach(c=>c.classList.remove('selected'));const day=k.split('-')[2];const d=document.querySelector('.day-cell[data-day="'+day+'"]');if(d)d.classList.add('selected');}
     function applyMoodColor(c){if(!pendingKey)return;if(c)data[pendingKey]={color:c};else delete data[pendingKey];saveData();if(pendingKey.split('-').length===3){const p=pendingKey.split('-');renderDaysGrid(parseInt(p[0]),parseInt(p[1]));}renderGrid();document.getElementById('moodPicker').classList.remove('active');}
     function setupEventListeners(){document.getElementById('gridContainer').addEventListener('click',e=>{const c=e.target.closest('.month-cell');if(c&&!c.classList.contains('empty-year')){renderDaysGrid(parseInt(c.dataset.year),parseInt(c.dataset.month));document.getElementById('daysModal').classList.add('active');}});document.getElementById('closeModal').addEventListener('click',()=>document.getElementById('daysModal').classList.remove('active'));document.getElementById('daysModal').addEventListener('click',e=>{if(e.target.id==='daysModal')document.getElementById('daysModal').classList.remove('active');});document.getElementById('daysGrid').addEventListener('click',e=>{const c=e.target.closest('.day-cell');if(c){const d=c.dataset.day,m=document.getElementById('monthTitle').textContent.match(/(\d+)年(\d+)月/);if(m){showMoodPicker(e.clientX,e.clientY,(parseInt(m[1])-birthYear)+'-'+m[2]+'-'+d);}}});document.addEventListener('click',e=>{const p=document.getElementById('moodPicker');if(!p.contains(e.target)&&!e.target.closest('.day-cell')&&!e.target.closest('.month-cell'))p.classList.remove('active');});}
     init();setupEventListeners();
