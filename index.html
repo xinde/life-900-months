@@ -42,9 +42,9 @@
     .month-cell .month-num { font-size: 10px; opacity: 0.6; }
     .month-cell .month-score { font-size: 14px; font-weight: bold; }
     
-    .days-modal { display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.85); z-index: 100; overflow-y: auto; padding: 20px; }
-    .days-modal.active { display: block; }
-    .days-modal-content { background: #1a1a2e; border-radius: 12px; max-width: 600px; margin: 40px auto; padding: 20px; }
+    .days-modal { display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.85); z-index: 100; overflow-y: auto; padding: 20px; transform: translateY(100%); transition: transform 0.3s ease; }
+    .days-modal.active { display: block; transform: translateY(0); }
+    .days-modal-content { background: #1a1a2e; border-radius: 16px 16px 0 0; max-width: 600px; margin: 40px auto 0; padding: 20px; }
     .modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
     .modal-header h2 { font-size: 1.5rem; }
     .close-btn { background: none; border: none; color: #fff; font-size: 24px; cursor: pointer; }
